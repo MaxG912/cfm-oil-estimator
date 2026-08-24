@@ -9,94 +9,741 @@
 <link rel="icon" href="icon.svg" type="image/svg+xml">
 <title>CFM Australia — Oil Consumption Estimator</title>
 <style>
+
+/* ==========================================================================
+   1. DESIGN TOKENS (colours, fonts) — change these to re-theme the whole app
+   ========================================================================== */
 :root{
- --red:#e30613;--black:#0d1114;--ink:#171b1e;--muted:#697176;--line:#d9dddf;
- --paper:#f6f7f7;--card:#fff;--soft:#fff4f3;--gold:#d39419;
- --sans:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
- --mono:ui-monospace,SFMono-Regular,Menlo,monospace
+  --red:#e30613;
+  --black:#0d1114;
+  --ink:#171b1e;
+  --muted:#697176;
+  --line:#d9dddf;
+  --paper:#f6f7f7;
+  --card:#fff;
+  --soft:#fff4f3;
+  --gold:#d39419;
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,monospace;
 }
-*{box-sizing:border-box}html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans)}
-body{min-height:100vh}.app{max-width:560px;margin:auto;min-height:100vh;background:var(--paper)}
+
+/* ==========================================================================
+   2. BASE / RESET
+   ========================================================================== */
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans)}
+body{min-height:100vh}
+.app{max-width:560px;margin:auto;min-height:100vh;background:var(--paper)}
+
+/* ==========================================================================
+   3. TOP BAR (logo + menu button)
+   ========================================================================== */
 .topbar{height:104px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:12px 24px 8px;border-bottom:1px solid #eee}
-.logo{width:205px;max-width:62%;height:auto}.menu{width:40px;height:40px;border:0;background:transparent;font-size:28px;line-height:1;cursor:pointer;color:#111}
+.logo{width:205px;max-width:62%;height:auto}
+.menu{width:40px;height:40px;border:0;background:transparent;font-size:28px;line-height:1;cursor:pointer;color:#111}
+
+/* ==========================================================================
+   4. HERO BANNER (black header with title + curved bottom edge)
+   ========================================================================== */
 .hero{background:var(--black);color:#fff;padding:26px 28px 46px;position:relative;overflow:hidden}
 .hero:after{content:"";position:absolute;left:-5%;right:-5%;bottom:-44px;height:72px;background:var(--paper);border-radius:50% 50% 0 0/100% 100% 0 0}
 .hero-icon{width:58px;height:58px;border:2px solid var(--red);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:28px;margin-bottom:15px}
-.hero h1{font-size:31px;line-height:.98;letter-spacing:-.035em;margin:0 0 10px;font-weight:900}.hero p{margin:0;color:#d9dddf;font-size:14px}
+.hero h1{font-size:31px;line-height:.98;letter-spacing:-.035em;margin:0 0 10px;font-weight:900}
+.hero p{margin:0;color:#d9dddf;font-size:14px}
+
+/* ==========================================================================
+   5. MAIN CONTENT WRAPPER + GENERIC CARD STYLE
+   ========================================================================== */
 .content{padding:0 20px;position:relative;margin-top:-1px;z-index:2}
 .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:14px;box-shadow:0 3px 12px rgba(0,0,0,.045)}
-.card.customer{margin-top:-4px}.heading{font-size:15px;font-weight:900;display:flex;align-items:center;gap:10px;margin:0 0 16px}.num{width:28px;height:28px;border-radius:50%;background:var(--soft);color:var(--red);display:flex;align-items:center;justify-content:center;font-size:12px}
-label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.045em;font-weight:800;color:#596166;margin-bottom:6px}
-input,select{width:100%;height:50px;border:1px solid #cbd1d3;border-radius:8px;background:#fff;padding:0 13px;font:600 16px var(--sans);color:var(--ink)}input:focus,select:focus{outline:2px solid var(--red);outline-offset:1px}
-.help{font-size:11px;color:var(--muted);margin:6px 0 0}
-.counter{height:52px;border:1px solid #cbd1d3;border-radius:8px;display:grid;grid-template-columns:58px 1fr 58px;overflow:hidden}.counter button{border:0;background:#fff;color:var(--red);font-size:26px;font-weight:800;cursor:pointer}.counter button:active{background:var(--soft)}.counter-value{display:flex;align-items:center;justify-content:center;border-left:1px solid #e2e5e6;border-right:1px solid #e2e5e6;font:800 21px var(--mono)}
-.field{margin-bottom:16px}.field:last-child{margin-bottom:0}
-.topup{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#fff8eb;border:1px solid #efd9aa;border-radius:9px;padding:12px}.topup-title{font-size:12px;font-weight:900}.topup-copy{font-size:11px;color:#80683d;margin-top:3px}.topup-badge{background:#fff;border:1px solid #dfbd72;color:#79540d;border-radius:7px;padding:7px 9px;font:800 13px var(--mono)}
-.info-link{border:0;background:transparent;color:var(--muted);font-size:11px;padding:0;cursor:pointer;margin-top:9px;float:right}
-.result{padding:0;overflow:hidden}.result-title{background:var(--black);color:#fff;padding:14px 18px;font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:900}.result-body{padding:20px}.result-label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:800}.weekly{font:900 50px/1 var(--mono);color:var(--red);margin:8px 0 5px;letter-spacing:-.04em}.unit{font-size:12px;color:var(--muted)}
-.stats{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);margin-top:18px;padding-top:16px}.stat+.stat{border-left:1px solid var(--line);padding-left:18px}.stat-value{font:800 22px var(--mono)}.stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:4px}
-.actions{display:grid;gap:10px;margin:13px 0}.action{width:100%;height:54px;border-radius:9px;font:900 14px var(--sans);cursor:pointer}.primary{border:1px solid #b9000a;background:var(--red);color:#fff}.secondary{border:1px solid #aeb6ba;background:#fff;color:var(--ink)}
-.footer{text-align:center;color:#858d91;font-size:10px;padding:14px 20px 22px}.footer img{width:130px;display:block;margin:0 auto 9px}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:20;padding:20px}.modal.open{display:flex;align-items:center;justify-content:center}.modal-box{background:#fff;border-radius:14px;padding:22px;max-width:480px;width:100%}.modal-box h2{font-size:19px;margin:0 0 12px}.modal-box p{font-size:13px;line-height:1.55;color:var(--muted)}.close{width:100%;height:46px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:800}
-.export{display:none;position:fixed;inset:0;z-index:30;background:#eef0f0;overflow:auto}.export.open{display:block}.toolbar{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);height:66px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;z-index:2}.toolbar button{border:0;background:transparent;font-weight:900;font-size:14px;padding:9px;cursor:pointer}.toolbar .pdf{background:var(--red);color:#fff;border-radius:7px;padding:11px 13px}
-.export-area{padding:20px 14px 32px}.report{background:#fff;border:1px solid #c7cdcf;border-radius:12px;max-width:794px;margin:0 auto;padding:42px 45px;box-shadow:0 3px 16px rgba(0,0,0,.08)}.report-logo{display:block;width:205px;max-width:65%;margin:0 auto 24px}.report-title{text-align:center;font-size:23px;margin:0;padding:0 0 16px;border-bottom:2px solid var(--red);font-weight:900}.report-customer{text-align:center;font-size:20px;font-weight:800;margin-top:24px}.report-date{text-align:center;color:var(--muted);font-size:12px;margin:5px 0 32px}.report h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--red);margin:0 0 10px}.details{width:100%;border-collapse:collapse;margin-bottom:28px}.details td{padding:10px 0;border-bottom:1px solid #e2e5e6;font-size:13px}.details td:last-child{text-align:right;font-weight:800}.report-results{border:1px solid #cbd1d3;border-radius:9px;padding:5px 18px}.rr{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid #e2e5e6}.rr:last-child{border-bottom:0}.rr span{font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.05em;font-weight:800}.rr strong{font:900 25px var(--mono);color:var(--red)}.report-note{font-size:11px;line-height:1.6;color:var(--muted);margin-top:28px}.report-footer{border-top:1px solid #e2e5e6;margin-top:65px;padding-top:12px;text-align:center;font-size:9px;color:#899196}.report-footer img{width:120px;display:block;margin:0 auto 7px}
-@media(max-width:430px){.topbar{height:92px;padding:10px 18px}.logo{width:190px}.hero{padding:23px 22px 42px}.hero h1{font-size:27px}.content{padding:0 14px}.card{padding:16px}.weekly{font-size:43px}.report{padding:28px 21px}.report-logo{width:170px}.report-title{font-size:20px}.rr strong{font-size:21px}}
-@media print{body{background:#fff}.toolbar{display:none}.export-area{padding:0}.report{border:0;box-shadow:none;border-radius:0;max-width:none}}
+.card.customer{margin-top:-4px}
+.heading{font-size:15px;font-weight:900;display:flex;align-items:center;gap:10px;margin:0 0 16px}
+.num{width:28px;height:28px;border-radius:50%;background:var(--soft);color:var(--red);display:flex;align-items:center;justify-content:center;font-size:12px}
 
-.days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}.day{height:42px;border:1px solid #cbd1d3;border-radius:7px;background:#fff;font:800 14px var(--mono);color:#4e565b;cursor:pointer}.day.selected{background:var(--red);border-color:var(--red);color:#fff}.day:active{transform:translateY(1px)}
-.scenario{border:1px solid #cbd1d3;border-radius:9px;padding:14px;background:#fff}.scenario.current{background:#f8f9f9}.scenario.potential{background:#fff8eb;border-color:#efd9aa}.scenario-title{font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:900;margin-bottom:8px}.scenario.current .scenario-title{color:#596166}.scenario.potential .scenario-title{color:#8a5b0d}.interval{font:900 28px var(--mono);color:var(--red);margin-bottom:9px}.potential .interval{color:#9a650e}.scenario .mini-result{font-size:13px;color:var(--muted)}.scenario .mini-result strong{font:800 18px var(--mono);color:var(--ink)}
-.savings{background:#eff7f0;border:1px solid #cfe2d1;border-radius:12px;padding:18px 20px;margin-bottom:14px}.savings h3{margin:0 0 13px;font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:#2f6b3a}.saving-main{font:900 36px var(--mono);color:#2f6b3a}.saving-label{font-size:11px;color:#5b7460;margin-top:3px}.saving-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:15px;padding-top:13px;border-top:1px solid #d3e4d5}.saving-value{font:800 17px var(--mono);color:#274e2e}.saving-unit{font-size:9px;text-transform:uppercase;color:#6b7e70;margin-top:3px}
-@media(max-width:430px){.days{gap:4px}.day{height:39px}.saving-grid{gap:5px}}
+/* ==========================================================================
+   6. FORM CONTROLS (labels, inputs, selects, +/- counter, help text)
+   ========================================================================== */
+label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.045em;font-weight:800;color:#596166;margin-bottom:6px}
+input,select{width:100%;height:50px;border:1px solid #cbd1d3;border-radius:8px;background:#fff;padding:0 13px;font:600 16px var(--sans);color:var(--ink)}
+input:focus,select:focus{outline:2px solid var(--red);outline-offset:1px}
+.help{font-size:11px;color:var(--muted);margin:6px 0 0}
+
+/* Number-of-fryers stepper (minus / value / plus) */
+.counter{height:52px;border:1px solid #cbd1d3;border-radius:8px;display:grid;grid-template-columns:58px 1fr 58px;overflow:hidden}
+.counter button{border:0;background:#fff;color:var(--red);font-size:26px;font-weight:800;cursor:pointer}
+.counter button:active{background:var(--soft)}
+.counter-value{display:flex;align-items:center;justify-content:center;border-left:1px solid #e2e5e6;border-right:1px solid #e2e5e6;font:800 21px var(--mono)}
+
+.field{margin-bottom:16px}
+.field:last-child{margin-bottom:0}
+
+/* Top-up allowance callout box (fixed 10%) */
+.topup{display:flex;justify-content:space-between;align-items:center;gap:12px;background:#fff8eb;border:1px solid #efd9aa;border-radius:9px;padding:12px}
+.topup-title{font-size:12px;font-weight:900}
+.topup-copy{font-size:11px;color:#80683d;margin-top:3px}
+.topup-badge{background:#fff;border:1px solid #dfbd72;color:#79540d;border-radius:7px;padding:7px 9px;font:800 13px var(--mono)}
+
+.info-link{border:0;background:transparent;color:var(--muted);font-size:11px;padding:0;cursor:pointer;margin-top:9px;float:right}
+
+/* ==========================================================================
+   7. DAY-PICKER GRID (used for both "current" and "potential" intervals)
+   ========================================================================== */
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.day{height:42px;border:1px solid #cbd1d3;border-radius:7px;background:#fff;font:800 14px var(--mono);color:#4e565b;cursor:pointer}
+.day.selected{background:var(--red);border-color:var(--red);color:#fff}
+.day:active{transform:translateY(1px)}
+
+/* ==========================================================================
+   8. CURRENT / POTENTIAL SCENARIO BOXES (interval-picker cards)
+   ========================================================================== */
+.scenario{border:1px solid #cbd1d3;border-radius:9px;padding:14px;background:#fff}
+.scenario.current{background:#f8f9f9}
+.scenario.potential{background:#fff8eb;border-color:#efd9aa}
+.scenario-title{font-size:12px;text-transform:uppercase;letter-spacing:.06em;font-weight:900;margin-bottom:8px}
+.scenario.current .scenario-title{color:#596166}
+.scenario.potential .scenario-title{color:#8a5b0d}
+.interval{font:900 28px var(--mono);color:var(--red);margin-bottom:9px}
+.potential .interval{color:#9a650e}
+.scenario .mini-result{font-size:13px;color:var(--muted)}
+.scenario .mini-result strong{font:800 18px var(--mono);color:var(--ink)}
+
+/* ==========================================================================
+   9. RESULT CARDS (weekly / monthly / annual consumption — used for both
+      the "current" totals and the "potential with CFM" totals)
+   ========================================================================== */
+.result{padding:0;overflow:hidden}
+.result-title{background:var(--black);color:#fff;padding:14px 18px;font-size:12px;text-transform:uppercase;letter-spacing:.08em;font-weight:900}
+.result-body{padding:20px}
+.result-label{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:800}
+.weekly{font:900 50px/1 var(--mono);color:var(--red);margin:8px 0 5px;letter-spacing:-.04em}
+.unit{font-size:12px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line);margin-top:18px;padding-top:16px}
+.stat+.stat{border-left:1px solid var(--line);padding-left:18px}
+.stat-value{font:800 22px var(--mono)}
+.stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:4px}
+
+/* ==========================================================================
+   10. SAVINGS CARD (green "potential saving with CFM" panel)
+   ========================================================================== */
+.savings{background:#eff7f0;border:1px solid #cfe2d1;border-radius:12px;padding:18px 20px;margin-bottom:14px}
+.savings h3{margin:0 0 13px;font-size:12px;text-transform:uppercase;letter-spacing:.07em;color:#2f6b3a}
+.saving-main{font:900 36px var(--mono);color:#2f6b3a}
+.saving-label{font-size:11px;color:#5b7460;margin-top:3px}
+.saving-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:15px;padding-top:13px;border-top:1px solid #d3e4d5}
+.saving-value{font:800 17px var(--mono);color:#274e2e}
+.saving-unit{font-size:9px;text-transform:uppercase;color:#6b7e70;margin-top:3px}
+
+/* ==========================================================================
+   11. ACTION BUTTONS (Export / New estimate) + FOOTER
+   ========================================================================== */
+.actions{display:grid;gap:10px;margin:13px 0}
+.action{width:100%;height:54px;border-radius:9px;font:900 14px var(--sans);cursor:pointer}
+.primary{border:1px solid #b9000a;background:var(--red);color:#fff}
+.secondary{border:1px solid #aeb6ba;background:#fff;color:var(--ink)}
+.footer{text-align:center;color:#858d91;font-size:10px;padding:14px 20px 22px}
+.footer img{width:130px;display:block;margin:0 auto 9px}
+
+/* ==========================================================================
+   12. "HOW IS THIS CALCULATED?" MODAL
+   ========================================================================== */
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:20;padding:20px}
+.modal.open{display:flex;align-items:center;justify-content:center}
+.modal-box{background:#fff;border-radius:14px;padding:22px;max-width:480px;width:100%}
+.modal-box h2{font-size:19px;margin:0 0 12px}
+.modal-box p{font-size:13px;line-height:1.55;color:var(--muted)}
+.close{width:100%;height:46px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:800}
+
+/* ==========================================================================
+   13. EXPORT / PRINT PREVIEW SCREEN (the full-page report view)
+   ========================================================================== */
+.export{display:none;position:fixed;inset:0;z-index:30;background:#eef0f0;overflow:auto}
+.export.open{display:block}
+.toolbar{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);height:66px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;z-index:2}
+.toolbar button{border:0;background:transparent;font-weight:900;font-size:14px;padding:9px;cursor:pointer}
+.toolbar .pdf{background:var(--red);color:#fff;border-radius:7px;padding:11px 13px}
+
+.export-area{padding:20px 14px 32px}
+.report{background:#fff;border:1px solid #c7cdcf;border-radius:12px;max-width:794px;margin:0 auto;padding:42px 45px;box-shadow:0 3px 16px rgba(0,0,0,.08)}
+.report-logo{display:block;width:205px;max-width:65%;margin:0 auto 24px}
+.report-title{text-align:center;font-size:23px;margin:0;padding:0 0 16px;border-bottom:2px solid var(--red);font-weight:900}
+.report-customer{text-align:center;font-size:20px;font-weight:800;margin-top:24px}
+.report-date{text-align:center;color:var(--muted);font-size:12px;margin:5px 0 32px}
+.report h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--red);margin:0 0 10px}
+.details{width:100%;border-collapse:collapse;margin-bottom:28px}
+.details td{padding:10px 0;border-bottom:1px solid #e2e5e6;font-size:13px}
+.details td:last-child{text-align:right;font-weight:800}
+.report-results{border:1px solid #cbd1d3;border-radius:9px;padding:5px 18px}
+.rr{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-bottom:1px solid #e2e5e6}
+.rr:last-child{border-bottom:0}
+.rr span{font-size:11px;text-transform:uppercase;color:var(--muted);letter-spacing:.05em;font-weight:800}
+.rr strong{font:900 25px var(--mono);color:var(--red)}
+.report-note{font-size:11px;line-height:1.6;color:var(--muted);margin-top:28px}
+.report-footer{border-top:1px solid #e2e5e6;margin-top:65px;padding-top:12px;text-align:center;font-size:9px;color:#899196}
+.report-footer img{width:120px;display:block;margin:0 auto 7px}
+
+/* ==========================================================================
+   14. SMALL-SCREEN RESPONSIVE OVERRIDES
+   ========================================================================== */
+@media(max-width:430px){
+  .topbar{height:92px;padding:10px 18px}
+  .logo{width:190px}
+  .hero{padding:23px 22px 42px}
+  .hero h1{font-size:27px}
+  .content{padding:0 14px}
+  .card{padding:16px}
+  .weekly{font-size:43px}
+  .report{padding:28px 21px}
+  .report-logo{width:170px}
+  .report-title{font-size:20px}
+  .rr strong{font-size:21px}
+  .days{gap:4px}
+  .day{height:39px}
+  .saving-grid{gap:5px}
+}
+
+/* ==========================================================================
+   15. ON-SCREEN PRINT STYLES (hides app chrome, keeps only the report)
+   ========================================================================== */
+@media print{
+  body{background:#fff}
+  .toolbar{display:none}
+  .export-area{padding:0}
+  .report{border:0;box-shadow:none;border-radius:0;max-width:none}
+}
+
+/* ==========================================================================
+   16. PDF-SPECIFIC PRINT LAYOUT (tighter spacing so it fits on one A4 page)
+   ========================================================================== */
 @page{size:A4 portrait;margin:10mm}
-@media print{html,body{background:#fff!important;margin:0!important;padding:0!important}body>*{display:none!important}#exportPage{display:block!important;position:static!important;background:#fff!important;overflow:visible!important}#exportPage .toolbar{display:none!important}#exportPage .export-area{display:block!important;padding:0!important}#exportPage .report{display:block!important;width:100%!important;max-width:none!important;min-height:0!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:5mm 8mm!important;page-break-inside:avoid!important}.report-logo{width:145px!important;margin:0 auto 12px!important}.report-title{font-size:18px!important;padding-bottom:9px!important}.report-customer{font-size:16px!important;margin-top:12px!important}.report-date{font-size:9px!important;margin:3px 0 16px!important}.report h3{font-size:9px!important;margin-bottom:6px!important}.details{margin-bottom:14px!important}.details td{padding:5px 0!important;font-size:9px!important}.report-results{padding:2px 12px!important}.rr{padding:8px 0!important}.rr span{font-size:8px!important}.rr strong{font-size:17px!important}.report-saving{padding:9px 12px!important;margin-top:11px!important}.report-saving strong{font-size:17px!important}.report-note{font-size:8px!important;line-height:1.35!important;margin-top:12px!important}.report-footer{margin-top:18px!important;padding-top:7px!important;font-size:7px!important}.report-footer img{width:85px!important;margin-bottom:4px!important}}
+@media print{
+  html,body{background:#fff!important;margin:0!important;padding:0!important}
+  body>*{display:none!important}
+  #exportPage{display:block!important;position:static!important;background:#fff!important;overflow:visible!important}
+  #exportPage .toolbar{display:none!important}
+  #exportPage .export-area{display:block!important;padding:0!important}
+  #exportPage .report{display:block!important;width:100%!important;max-width:none!important;min-height:0!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;padding:5mm 8mm!important;page-break-inside:avoid!important}
+  .report-logo{width:145px!important;margin:0 auto 12px!important}
+  .report-title{font-size:18px!important;padding-bottom:9px!important}
+  .report-customer{font-size:16px!important;margin-top:12px!important}
+  .report-date{font-size:9px!important;margin:3px 0 16px!important}
+  .report h3{font-size:9px!important;margin-bottom:6px!important}
+  .details{margin-bottom:14px!important}
+  .details td{padding:5px 0!important;font-size:9px!important}
+  .report-results{padding:2px 12px!important}
+  .rr{padding:8px 0!important}
+  .rr span{font-size:8px!important}
+  .rr strong{font-size:17px!important}
+  .report-saving{padding:9px 12px!important;margin-top:11px!important}
+  .report-saving strong{font-size:17px!important}
+  .report-note{font-size:8px!important;line-height:1.35!important;margin-top:12px!important}
+  .report-footer{margin-top:18px!important;padding-top:7px!important;font-size:7px!important}
+  .report-footer img{width:85px!important;margin-bottom:4px!important}
+}
 </style>
 </head>
 <body>
 <div class="app">
-<header class="topbar"><img class="logo" src="cfm-logo.png" alt="CFM Australia"><button class="menu" aria-label="Menu">☰</button></header>
-<section class="hero"><div class="hero-icon">💧</div><h1>OIL CONSUMPTION<br>ESTIMATOR</h1><p>Estimate your customer's oil usage</p></section>
-<main class="content">
-<section class="card customer"><h2 class="heading"><span class="num">1</span> CUSTOMER / SITE NAME</h2><label for="customer">Customer / site name</label><input id="customer" placeholder="e.g. Golden Wok Restaurant" autocomplete="organization"></section>
-<section class="card">
-<h2 class="heading"><span class="num">2</span> FRYER DETAILS</h2>
-<div class="field"><label for="size">Litres per fryer</label><select id="size"><option value="20">20 L</option><option value="25">25 L</option><option value="30" selected>30 L (Default)</option><option value="35">35 L</option><option value="40">40 L</option><option value="custom">Other / custom</option></select><p class="help">Common sizes: 20L, 25L, 30L, 35L, 40L</p></div>
-<div class="field"><label>Number of fryers</label><div class="counter"><button id="countMinus" type="button">−</button><div class="counter-value" id="countValue">1</div><button id="countPlus" type="button">+</button></div><input id="count" type="number" value="1" min="1" step="1" hidden></div>
-<div class="field"><label>Current oil replacement interval</label><div class="days" id="currentDays"><button class="day" data-day="1" type="button">1</button><button class="day" data-day="2" type="button">2</button><button class="day" data-day="3" type="button">3</button><button class="day" data-day="4" type="button">4</button><button class="day" data-day="5" type="button">5</button><button class="day" data-day="6" type="button">6</button><button class="day" data-day="7" type="button">7</button></div><p class="help">How many days does the customer currently go between full oil changes?</p></div>
-<div class="field" id="customWrap" hidden><label for="customSize">Other fryer capacity (L)</label><input id="customSize" type="number" min="1" step="1" placeholder="e.g. 45"></div>
-<div class="topup"><div><div class="topup-title">Top-up allowance</div><div class="topup-copy">10% has been added to account for top-up oil usage.</div></div><div class="topup-badge">10%</div></div>
-<button class="info-link" id="infoBtn">ⓘ How is this calculated?</button><div style="clear:both"></div>
-<div class="help" id="error" style="display:none;color:#b9000a">Please enter valid fryer details.</div>
-</section>
-<section class="card">
-<h2 class="heading"><span class="num">3</span> CURRENT CONSUMPTION</h2>
-<div class="scenario current"><div class="scenario-title">Customer currently changes oil</div><div class="interval" id="currentInterval">Every 4 days</div><div class="mini-result">Estimated usage: <strong id="currentWeekly">0 L/week</strong></div></div>
-</section>
-<section class="card">
-<h2 class="heading"><span class="num">4</span> POTENTIAL WITH CFM</h2>
-<div class="scenario potential"><div class="scenario-title">Suggested oil replacement interval</div><div class="days" id="potentialDays"><button class="day" data-day="1" type="button">1</button><button class="day" data-day="2" type="button">2</button><button class="day" data-day="3" type="button">3</button><button class="day" data-day="4" type="button">4</button><button class="day" data-day="5" type="button">5</button><button class="day" data-day="6" type="button">6</button><button class="day" data-day="7" type="button">7</button></div><p class="help">Move this to the interval you believe could be achievable with CFM.</p><div class="interval" id="potentialInterval" style="margin-top:12px">Every 5 days</div><div class="mini-result">Estimated usage: <strong id="potentialWeekly">0 L/week</strong></div></div>
-</section>
-<section class="card result"><div class="result-title">Estimated oil consumption</div><div class="result-body"><div class="result-label">Weekly</div><div class="weekly" id="weekly">0 L</div><div class="unit">including 10% top-up allowance</div><div class="stats"><div class="stat"><div class="stat-value" id="monthly">0 L</div><div class="stat-label">Monthly (4.33 weeks)</div></div><div class="stat"><div class="stat-value" id="annual">0 L</div><div class="stat-label">Annual (52 weeks)</div></div></div></div></section>
-<section class="savings"><h3>Potential oil saving with CFM</h3><div class="saving-main" id="savingWeekly">0 L/week</div><div class="saving-label" id="savingPercent">0% less estimated oil consumption</div><div class="saving-grid"><div><div class="saving-value" id="savingMonthly">0 L</div><div class="saving-unit">per month</div></div><div><div class="saving-value" id="savingAnnual">0 L</div><div class="saving-unit">per year</div></div><div><div class="saving-value" id="savingPercentSmall">0%</div><div class="saving-unit">reduction</div></div></div></section>
-<div class="actions"><button class="action primary" id="exportBtn">▣ &nbsp; EXPORT ESTIMATE</button><button class="action secondary" id="resetBtn">↻ &nbsp; NEW ESTIMATE</button></div>
-</main>
-<footer class="footer"><img src="cfm-logo.png" alt="CFM Australia">CFM Australia Oil Estimator v0.6</footer>
+
+  <!-- ============================================================
+       TOP BAR
+       ============================================================ -->
+  <header class="topbar">
+    <img class="logo" src="cfm-logo.png" alt="CFM Australia">
+    <button class="menu" aria-label="Menu">☰</button>
+  </header>
+
+  <!-- ============================================================
+       HERO BANNER
+       ============================================================ -->
+  <section class="hero">
+    <div class="hero-icon">💧</div>
+    <h1>OIL CONSUMPTION<br>ESTIMATOR</h1>
+    <p>Estimate your customer's oil usage</p>
+  </section>
+
+  <main class="content">
+
+    <!-- ============================================================
+         CUSTOMER / SITE NAME
+         ============================================================ -->
+    <section class="card customer">
+      <h2 class="heading">CUSTOMER / SITE NAME</h2>
+      <label for="customer">Customer / site name</label>
+      <input id="customer" placeholder="e.g. Golden Wok Restaurant" autocomplete="organization">
+    </section>
+
+    <!-- ============================================================
+         FRYER DETAILS (size, count, custom size, top-up notice)
+         Note: the "current interval" day-picker now lives in its own
+         card below, not in here.
+         ============================================================ -->
+    <section class="card">
+      <h2 class="heading">FRYER DETAILS</h2>
+
+      <!-- Litres per fryer -->
+      <div class="field">
+        <label for="size">Litres per fryer</label>
+        <select id="size">
+          <option value="15">15 L</option>
+          <option value="25">25 L</option>
+          <option value="27">27 L</option>
+          <option value="30" selected>30 L (Default)</option>
+          <option value="35">35 L</option>
+          <option value="40">40 L</option>
+          <option value="custom">Other / custom</option>
+        </select>
+        <p class="help">Common sizes: 15L, 25L, 27L, 30L, 35L, 40L</p>
+      </div>
+
+      <!-- Number of fryers (stepper control, hidden number input holds the real value) -->
+      <div class="field">
+        <label>Number of fryers</label>
+        <div class="counter">
+          <button id="countMinus" type="button">−</button>
+          <div class="counter-value" id="countValue">1</div>
+          <button id="countPlus" type="button">+</button>
+        </div>
+        <input id="count" type="number" value="1" min="1" step="1" hidden>
+      </div>
+
+      <!-- Custom fryer size field, only shown when "Other / custom" is selected above -->
+      <div class="field" id="customWrap" hidden>
+        <label for="customSize">Other fryer capacity (L)</label>
+        <input id="customSize" type="number" min="1" step="1" placeholder="e.g. 45">
+      </div>
+
+      <!-- Fixed 10% top-up allowance notice -->
+      <div class="topup">
+        <div>
+          <div class="topup-title">Top-up allowance</div>
+          <div class="topup-copy">10% has been added to account for top-up oil usage.</div>
+        </div>
+        <div class="topup-badge">10%</div>
+      </div>
+
+      <button class="info-link" id="infoBtn">ⓘ How is this calculated?</button>
+      <div style="clear:both"></div>
+
+      <div class="help" id="error" style="display:none;color:#b9000a">Please enter valid fryer details.</div>
+    </section>
+
+    <!-- ============================================================
+         CURRENT OIL INTERVAL (1–7 day picker for the customer's
+         existing oil-change routine)
+         ============================================================ -->
+    <section class="card">
+      <h2 class="heading">CURRENT OIL INTERVAL</h2>
+      <div class="scenario current">
+        <div class="scenario-title">How often does the customer currently replace their oil?</div>
+        <div class="days" id="currentDays">
+          <button class="day" data-day="1" type="button">1</button>
+          <button class="day" data-day="2" type="button">2</button>
+          <button class="day" data-day="3" type="button">3</button>
+          <button class="day" data-day="4" type="button">4</button>
+          <button class="day" data-day="5" type="button">5</button>
+          <button class="day" data-day="6" type="button">6</button>
+          <button class="day" data-day="7" type="button">7</button>
+        </div>
+        <div class="interval" id="currentInterval">Every 4 days</div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         RESULT — CURRENT CONSUMPTION (weekly / monthly / annual)
+         ============================================================ -->
+    <section class="card result">
+      <div class="result-title">Estimated oil consumption</div>
+      <div class="result-body">
+        <div class="result-label">Weekly</div>
+        <div class="weekly" id="weekly">0 L</div>
+        <div class="unit">including 10% top-up allowance</div>
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-value" id="monthly">0 L</div>
+            <div class="stat-label">Monthly (4.33 weeks)</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="annual">0 L</div>
+            <div class="stat-label">Annual (52 weeks)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         WITH CFM — POTENTIAL INTERVAL (rep picks the suggested
+         new interval)
+         ============================================================ -->
+    <section class="card">
+      <h2 class="heading">WITH CFM — POTENTIAL INTERVAL</h2>
+      <div class="scenario potential">
+        <div class="scenario-title">How often could you replace your oil with our system?</div>
+        <div class="days" id="potentialDays">
+          <button class="day" data-day="1" type="button">1</button>
+          <button class="day" data-day="2" type="button">2</button>
+          <button class="day" data-day="3" type="button">3</button>
+          <button class="day" data-day="4" type="button">4</button>
+          <button class="day" data-day="5" type="button">5</button>
+          <button class="day" data-day="6" type="button">6</button>
+          <button class="day" data-day="7" type="button">7</button>
+        </div>
+        <p class="help">Move this to the interval you believe could be achievable with CFM.</p>
+        <div class="interval" id="potentialInterval">Every 5 days</div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         RESULT — POTENTIAL CONSUMPTION WITH CFM (weekly / monthly / annual)
+         ============================================================ -->
+    <section class="card result">
+      <div class="result-title">Estimated oil consumption</div>
+      <div class="result-body">
+        <div class="result-label">With CFM</div>
+        <div class="weekly" id="potentialSummaryWeekly">0 L</div>
+        <div class="unit">including 10% top-up allowance</div>
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-value" id="potentialSummaryMonthly">0 L</div>
+            <div class="stat-label">Monthly (4.33 weeks)</div>
+          </div>
+          <div class="stat">
+            <div class="stat-value" id="potentialSummaryAnnual">0 L</div>
+            <div class="stat-label">Annual (52 weeks)</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         SAVINGS SUMMARY — current vs potential
+         (top row: per week/month/year totals. bottom row: % reduction)
+         ============================================================ -->
+    <section class="savings">
+      <h3>Potential oil saving with CFM</h3>
+      <div class="saving-grid" style="grid-template-columns:repeat(3,1fr);margin-top:0;padding-top:0;border-top:0">
+        <div>
+          <div class="saving-value" id="savingWeekly">0 L</div>
+          <div class="saving-unit">per week</div>
+        </div>
+        <div>
+          <div class="saving-value" id="savingMonthly">0 L</div>
+          <div class="saving-unit">per month</div>
+        </div>
+        <div>
+          <div class="saving-value" id="savingAnnual">0 L</div>
+          <div class="saving-unit">per year</div>
+        </div>
+      </div>
+      <div style="margin-top:14px;padding-top:13px;border-top:1px solid #d3e4d5;text-align:center">
+        <div class="saving-value" id="savingPercentSmall">0%</div>
+        <div class="saving-unit">estimated reduction</div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         ACTION BUTTONS
+         ============================================================ -->
+    <div class="actions">
+      <button class="action primary" id="exportBtn">▣ &nbsp; EXPORT ESTIMATE</button>
+      <button class="action secondary" id="resetBtn">↻ &nbsp; NEW ESTIMATE</button>
+    </div>
+
+  </main>
+
+  <footer class="footer">
+    <img src="cfm-logo.png" alt="CFM Australia">
+    CFM Australia Oil Estimator v0.7
+  </footer>
 </div>
 
-<div class="modal" id="infoModal"><div class="modal-box"><h2>How we estimate</h2><p><strong>Fryer capacity × number of fryers × oil replacements per week</strong>, plus CFM's fixed 10% top-up allowance.</p><p>The 10% allowance is fixed for this sales estimator and is not editable by the rep.</p><button class="close" id="closeInfo">Close</button></div></div>
+<!-- ============================================================
+     "HOW IS THIS CALCULATED?" MODAL
+     ============================================================ -->
+<div class="modal" id="infoModal">
+  <div class="modal-box">
+    <h2>How we estimate</h2>
+    <p><strong>Fryer capacity × number of fryers × oil replacements per week</strong>, plus CFM's fixed 10% top-up allowance.</p>
+    <p>The 10% allowance is fixed for this sales estimator and is not editable by the rep.</p>
+    <button class="close" id="closeInfo">Close</button>
+  </div>
+</div>
 
-<section class="export" id="exportPage"><div class="toolbar"><button id="back">← Back</button><strong>EXPORT PREVIEW</strong><button class="pdf" id="pdf">PRINT / SAVE PDF</button></div><div class="export-area"><article class="report" id="report"></article></div></section>
+<!-- ============================================================
+     EXPORT / PRINT PREVIEW PAGE (report HTML is injected by JS)
+     ============================================================ -->
+<section class="export" id="exportPage">
+  <div class="toolbar">
+    <button id="back">← Back</button>
+    <strong>EXPORT PREVIEW</strong>
+    <button class="pdf" id="pdf">PRINT / SAVE PDF</button>
+  </div>
+  <div class="export-area">
+    <article class="report" id="report"></article>
+  </div>
+</section>
+
 <script>
-const $=id=>document.getElementById(id),TOPUP=.10;let currentDays=4,potentialDays=5;
-function size(){return $("size").value==="custom"?Number($("customSize").value):Number($("size").value)}
-function usage(days){let s=size(),n=+$ ("count").value;return s>0&&n>0&&days>0?s*n*(7/days)*(1+TOPUP):0}
-function renderDays(){document.querySelectorAll("#currentDays .day").forEach(b=>b.classList.toggle("selected",+b.dataset.day===currentDays));document.querySelectorAll("#potentialDays .day").forEach(b=>b.classList.toggle("selected",+b.dataset.day===potentialDays));$("currentInterval").textContent=`Every ${currentDays} day${currentDays===1?"":"s"}`;$("potentialInterval").textContent=`Every ${potentialDays} day${potentialDays===1?"":"s"}`}
-function calculate(){let s=size(),n=+$ ("count").value,curr=usage(currentDays),pot=usage(potentialDays),valid=s>0&&n>0;$("weekly").textContent=Math.round(curr).toLocaleString("en-AU")+" L";$("monthly").textContent=Math.round(curr*4.33).toLocaleString("en-AU")+" L";$("annual").textContent=Math.round(curr*52).toLocaleString("en-AU")+" L";$("currentWeekly").textContent=Math.round(curr).toLocaleString("en-AU")+" L/week";$("potentialWeekly").textContent=Math.round(pot).toLocaleString("en-AU")+" L/week";let sw=Math.max(0,curr-pot),sm=sw*4.33,sa=sw*52,pct=curr>0?Math.max(0,sw/curr*100):0;$("savingWeekly").textContent=Math.round(sw).toLocaleString("en-AU")+" L/week";$("savingMonthly").textContent=Math.round(sm).toLocaleString("en-AU")+" L";$("savingAnnual").textContent=Math.round(sa).toLocaleString("en-AU")+" L";$("savingPercent").textContent=pct.toFixed(0)+"% less estimated oil consumption";$("savingPercentSmall").textContent=pct.toFixed(0)+"%";return{s,n,curr,pot,sw,sm,sa,pct,valid}}
-function save(){localStorage.setItem("oilV06",JSON.stringify({customer:$("customer").value,size:$("size").value,custom:$("customSize").value,count:$("count").value,currentDays,potentialDays}))}
-function load(){try{let d=JSON.parse(localStorage.getItem("oilV06")||"null");if(!d)return;$("customer").value=d.customer||"";$("size").value=d.size||"30";$("customSize").value=d.custom||"";$("count").value=d.count||1;currentDays=d.currentDays||4;potentialDays=d.potentialDays||5;$("countValue").textContent=$("count").value;$("customWrap").hidden=$("size").value!=="custom"}catch(e){}}
-function counter(id,val,delta){$(id).value=Math.max(1,Math.round(+$ (id).value+delta));$(val).textContent=$(id).value;calculate();save()}
-function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
-function exportPreview(){let x=calculate();if(!x.valid)return;let name=$("customer").value.trim()||"Unnamed customer",date=new Date().toLocaleDateString("en-AU",{year:"numeric",month:"long",day:"numeric"});$("report").innerHTML=`<img class="report-logo" src="cfm-logo.png" alt="CFM Australia"><h1 class="report-title">OIL CONSUMPTION ESTIMATE</h1><div class="report-customer">${esc(name)}</div><div class="report-date">Estimated ${date}</div><h3>FRYER DETAILS</h3><table class="details"><tr><td>Litres per fryer</td><td>${x.s} L</td></tr><tr><td>Number of fryers</td><td>${x.n}</td></tr><tr><td>Current oil replacement</td><td>Every ${currentDays} day${currentDays===1?"":"s"}</td></tr><tr><td>Potential with CFM</td><td>Every ${potentialDays} day${potentialDays===1?"":"s"}</td></tr><tr><td>Top-up allowance</td><td>10%</td></tr></table><h3>ESTIMATED OIL CONSUMPTION</h3><div class="report-results"><div class="rr"><span>Current weekly</span><strong>${Math.round(x.curr).toLocaleString("en-AU")} L</strong></div><div class="rr"><span>Current monthly</span><strong>${Math.round(x.curr*4.33).toLocaleString("en-AU")} L</strong></div><div class="rr"><span>Current annual</span><strong>${Math.round(x.curr*52).toLocaleString("en-AU")} L</strong></div></div><div class="report-saving"><div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#52705a;font-weight:800">Potential saving with CFM</div><strong>${Math.round(x.sw).toLocaleString("en-AU")} L/week</strong><div style="font-size:10px;color:#607466;margin-top:4px">${Math.round(x.sm).toLocaleString("en-AU")} L/month · ${Math.round(x.sa).toLocaleString("en-AU")} L/year · ${x.pct.toFixed(0)}% reduction</div></div><p class="report-note">Estimate only. The calculation uses fryer capacity × number of fryers × (7 ÷ days between oil changes), plus CFM's 10% top-up allowance.</p><div class="report-footer"><img src="cfm-logo.png" alt="CFM Australia">CFM Australia Oil Estimator</div>`;$("exportPage").classList.add("open")}
-document.querySelectorAll("#currentDays .day").forEach(b=>b.onclick=()=>{currentDays=+b.dataset.day;renderDays();calculate();save()});document.querySelectorAll("#potentialDays .day").forEach(b=>b.onclick=()=>{potentialDays=+b.dataset.day;renderDays();calculate();save()});$("countMinus").onclick=()=>counter("count","countValue",-1);$("countPlus").onclick=()=>counter("count","countValue",1);["customer","customSize"].forEach(id=>$(id).addEventListener("input",()=>{calculate();save()}));$("size").onchange=()=>{$("customWrap").hidden=$("size").value!=="custom";calculate();save()};$("exportBtn").onclick=exportPreview;$("back").onclick=()=>$("exportPage").classList.remove("open");$("pdf").onclick=()=>window.print();$("resetBtn").onclick=()=>{localStorage.removeItem("oilV06");$("customer").value="";$("size").value="30";$("customSize").value="";$("count").value=1;$("countValue").textContent=1;currentDays=4;potentialDays=5;renderDays();calculate();$("customer").focus()};$("infoBtn").onclick=()=>$("infoModal").classList.add("open");$("closeInfo").onclick=()=>$("infoModal").classList.remove("open");$("infoModal").onclick=e=>{if(e.target===$("infoModal"))$("infoModal").classList.remove("open")};load();renderDays();calculate();if("serviceWorker"in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js"));
+/* ==========================================================================
+   SHORTHAND + CONSTANTS
+   ========================================================================== */
+const $ = id => document.getElementById(id);
+const TOPUP = 0.10; // fixed 10% top-up allowance, not editable by the rep
+
+// Currently selected day-interval for each scenario (1–7 days)
+let currentDays = 4;
+let potentialDays = 5;
+
+
+/* ==========================================================================
+   CORE CALCULATIONS
+   ========================================================================== */
+
+// Reads the fryer size from the dropdown, or the custom input if "Other" is selected
+function size() {
+  return $("size").value === "custom" ? Number($("customSize").value) : Number($("size").value);
+}
+
+// Weekly oil usage (L) for a given replacement interval, including the 10% top-up
+// Formula: litres per fryer × number of fryers × (7 / days between changes) × 1.10
+function usage(days) {
+  let s = size();
+  let n = +$("count").value;
+  return s > 0 && n > 0 && days > 0 ? s * n * (7 / days) * (1 + TOPUP) : 0;
+}
+
+
+/* ==========================================================================
+   RENDERING — day pickers, results, savings
+   ========================================================================== */
+
+// Highlights the selected day button in both day-picker grids and updates the interval labels
+function renderDays() {
+  document.querySelectorAll("#currentDays .day").forEach(b =>
+    b.classList.toggle("selected", +b.dataset.day === currentDays)
+  );
+  document.querySelectorAll("#potentialDays .day").forEach(b =>
+    b.classList.toggle("selected", +b.dataset.day === potentialDays)
+  );
+  $("currentInterval").textContent = `Every ${currentDays} day${currentDays === 1 ? "" : "s"}`;
+  $("potentialInterval").textContent = `Every ${potentialDays} day${potentialDays === 1 ? "" : "s"}`;
+}
+
+// Recalculates everything (current usage, potential usage, savings) and writes it to the DOM.
+// Returns the raw numbers so exportPreview() can reuse them without recalculating.
+function calculate() {
+  let s = size();
+  let n = +$("count").value;
+  let curr = usage(currentDays);
+  let pot = usage(potentialDays);
+  let valid = s > 0 && n > 0;
+
+  // --- Current consumption result card ---
+  $("weekly").textContent = Math.round(curr).toLocaleString("en-AU") + " L";
+  $("monthly").textContent = Math.round(curr * 4.33).toLocaleString("en-AU") + " L";
+  $("annual").textContent = Math.round(curr * 52).toLocaleString("en-AU") + " L";
+
+  // --- Potential (with CFM) consumption result card ---
+  $("potentialSummaryWeekly").textContent = Math.round(pot).toLocaleString("en-AU") + " L";
+  $("potentialSummaryMonthly").textContent = Math.round(pot * 4.33).toLocaleString("en-AU") + " L";
+  $("potentialSummaryAnnual").textContent = Math.round(pot * 52).toLocaleString("en-AU") + " L";
+
+  // --- Savings card (current minus potential) ---
+  let sw = Math.max(0, curr - pot);       // saving per week
+  let sm = sw * 4.33;                     // saving per month
+  let sa = sw * 52;                       // saving per year
+  let pct = curr > 0 ? Math.max(0, sw / curr * 100) : 0; // % reduction
+
+  $("savingWeekly").textContent = Math.round(sw).toLocaleString("en-AU") + " L/week";
+  $("savingMonthly").textContent = Math.round(sm).toLocaleString("en-AU") + " L";
+  $("savingAnnual").textContent = Math.round(sa).toLocaleString("en-AU") + " L";
+  $("savingPercentSmall").textContent = pct.toFixed(0) + "%";
+
+  return { s, n, curr, pot, sw, sm, sa, pct, valid };
+}
+
+
+/* ==========================================================================
+   PERSISTENCE — save/load form state to localStorage so it survives a refresh
+   ========================================================================== */
+
+function save() {
+  localStorage.setItem("oilV06", JSON.stringify({
+    customer: $("customer").value,
+    size: $("size").value,
+    custom: $("customSize").value,
+    count: $("count").value,
+    currentDays,
+    potentialDays
+  }));
+}
+
+function load() {
+  try {
+    let d = JSON.parse(localStorage.getItem("oilV06") || "null");
+    if (!d) return;
+    $("customer").value = d.customer || "";
+    $("size").value = d.size || "30";
+    $("customSize").value = d.custom || "";
+    $("count").value = d.count || 1;
+    currentDays = d.currentDays || 4;
+    potentialDays = d.potentialDays || 5;
+    $("countValue").textContent = $("count").value;
+    $("customWrap").hidden = $("size").value !== "custom";
+  } catch (e) {
+    // Ignore malformed/missing saved state — form just falls back to defaults
+  }
+}
+
+
+/* ==========================================================================
+   UI HELPERS
+   ========================================================================== */
+
+// Handles the +/- fryer count stepper: updates the hidden number input + visible counter,
+// then recalculates and saves.
+function counter(id, val, delta) {
+  $(id).value = Math.max(1, Math.round(+$(id).value + delta));
+  $(val).textContent = $(id).value;
+  calculate();
+  save();
+}
+
+// Escapes user-entered text before injecting it into the export report's HTML
+function esc(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+
+/* ==========================================================================
+   EXPORT / PRINT PREVIEW — builds the printable report HTML
+   ========================================================================== */
+
+function exportPreview() {
+  let x = calculate();
+  if (!x.valid) return;
+
+  let name = $("customer").value.trim() || "Unnamed customer";
+  let date = new Date().toLocaleDateString("en-AU", { year: "numeric", month: "long", day: "numeric" });
+
+  $("report").innerHTML = `
+    <img class="report-logo" src="cfm-logo.png" alt="CFM Australia">
+    <h1 class="report-title">OIL CONSUMPTION ESTIMATE</h1>
+    <div class="report-customer">${esc(name)}</div>
+    <div class="report-date">Estimated ${date}</div>
+
+    <h3>CURRENT OIL INTERVAL</h3>
+    <table class="details">
+      <tr><td>Litres per fryer</td><td>${x.s} L</td></tr>
+      <tr><td>Number of fryers</td><td>${x.n}</td></tr>
+      <tr><td>Current oil replacement</td><td>Every ${currentDays} day${currentDays === 1 ? "" : "s"}</td></tr>
+      <tr><td>Top-up allowance</td><td>10%</td></tr>
+    </table>
+    <div class="report-results">
+      <div class="rr"><span>Weekly</span><strong>${Math.round(x.curr).toLocaleString("en-AU")} L</strong></div>
+      <div class="rr"><span>Monthly</span><strong>${Math.round(x.curr * 4.33).toLocaleString("en-AU")} L</strong></div>
+      <div class="rr"><span>Annual</span><strong>${Math.round(x.curr * 52).toLocaleString("en-AU")} L</strong></div>
+    </div>
+
+    <h3 style="margin-top:24px">WITH CFM — POTENTIAL INTERVAL</h3>
+    <table class="details">
+      <tr><td>Suggested oil replacement</td><td>Every ${potentialDays} day${potentialDays === 1 ? "" : "s"}</td></tr>
+    </table>
+    <div class="report-results">
+      <div class="rr"><span>Weekly</span><strong>${Math.round(x.pot).toLocaleString("en-AU")} L</strong></div>
+      <div class="rr"><span>Monthly</span><strong>${Math.round(x.pot * 4.33).toLocaleString("en-AU")} L</strong></div>
+      <div class="rr"><span>Annual</span><strong>${Math.round(x.pot * 52).toLocaleString("en-AU")} L</strong></div>
+    </div>
+
+    <div class="report-saving">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:#52705a;font-weight:800">Potential oil saving with CFM</div>
+      <strong>${Math.round(x.sw).toLocaleString("en-AU")} L/week</strong>
+      <div style="font-size:10px;color:#607466;margin-top:4px">
+        ${Math.round(x.sm).toLocaleString("en-AU")} L/month · ${Math.round(x.sa).toLocaleString("en-AU")} L/year · ${x.pct.toFixed(0)}% reduction
+      </div>
+    </div>
+
+    <p class="report-note">Estimate only. The calculation uses fryer capacity × number of fryers × (7 ÷ days between oil changes), plus CFM's 10% top-up allowance.</p>
+
+    <div class="report-footer">
+      <img src="cfm-logo.png" alt="CFM Australia">
+      CFM Australia Oil Estimator
+    </div>`;
+
+  $("exportPage").classList.add("open");
+}
+
+
+/* ==========================================================================
+   EVENT WIRING — hooks up every interactive element to the functions above
+   ========================================================================== */
+
+// Day pickers (current + potential interval)
+document.querySelectorAll("#currentDays .day").forEach(b =>
+  b.onclick = () => { currentDays = +b.dataset.day; renderDays(); calculate(); save(); }
+);
+document.querySelectorAll("#potentialDays .day").forEach(b =>
+  b.onclick = () => { potentialDays = +b.dataset.day; renderDays(); calculate(); save(); }
+);
+
+// Fryer count stepper
+$("countMinus").onclick = () => counter("count", "countValue", -1);
+$("countPlus").onclick = () => counter("count", "countValue", 1);
+
+// Text/number inputs that trigger a live recalculation
+["customer", "customSize"].forEach(id =>
+  $(id).addEventListener("input", () => { calculate(); save(); })
+);
+
+// Fryer size dropdown — shows/hides the custom size field
+$("size").onchange = () => {
+  $("customWrap").hidden = $("size").value !== "custom";
+  calculate();
+  save();
+};
+
+// Export / navigation buttons
+$("exportBtn").onclick = exportPreview;
+$("back").onclick = () => $("exportPage").classList.remove("open");
+$("pdf").onclick = () => window.print();
+
+// Reset button — clears saved state and returns the form to defaults
+$("resetBtn").onclick = () => {
+  localStorage.removeItem("oilV06");
+  $("customer").value = "";
+  $("size").value = "30";
+  $("customSize").value = "";
+  $("count").value = 1;
+  $("countValue").textContent = 1;
+  currentDays = 4;
+  potentialDays = 5;
+  renderDays();
+  calculate();
+  $("customer").focus();
+};
+
+// "How is this calculated?" info modal
+$("infoBtn").onclick = () => $("infoModal").classList.add("open");
+$("closeInfo").onclick = () => $("infoModal").classList.remove("open");
+$("infoModal").onclick = e => {
+  if (e.target === $("infoModal")) $("infoModal").classList.remove("open");
+};
+
+
+/* ==========================================================================
+   INITIALISATION — runs once on page load
+   ========================================================================== */
+load();        // restore any saved form state
+renderDays();  // reflect currentDays/potentialDays in the UI
+calculate();   // populate results based on loaded/default state
+
+// Register the service worker for offline/PWA support, if supported
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => navigator.serviceWorker.register("./sw.js"));
+}
 </script>
 </body>
 </html>
