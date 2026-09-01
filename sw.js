@@ -1,4 +1,4 @@
-const CACHE = "cfm-oil-v0.9";
+const CACHE = "cfm-oil-v0.91";
 
 const ASSETS = [
   "./",
@@ -13,7 +13,6 @@ self.addEventListener("install", event => {
   event.waitUntil(
     caches.open(CACHE).then(cache => cache.addAll(ASSETS))
   );
-
   self.skipWaiting();
 });
 
@@ -27,7 +26,6 @@ self.addEventListener("activate", event => {
       )
     )
   );
-
   self.clients.claim();
 });
 
