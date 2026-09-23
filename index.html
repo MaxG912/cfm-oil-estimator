@@ -512,7 +512,7 @@ input:focus,select:focus{outline:2px solid var(--red);outline-offset:1px}
 
   <footer class="footer">
     <img src="cfm-logo.png" alt="CFM Australia">
-    CFM Australia Oil Estimator v1.0
+    CFM Australia Oil Estimator v1.0.1
   </footer>
 </div>
 
@@ -880,43 +880,82 @@ $("size").onchange = () => {
 // Export / navigation buttons
 $("exportBtn").onclick = exportPreview;
 $("back").onclick = () => $("exportPage").classList.remove("open");
-$("pdf").onclick = () => {
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
-
-  // iPhone Home Screen apps do not reliably expose the print dialog.
-  // Open a printable copy in a browser context instead.
-  if (isIOS && isStandalone) {
-    const report = $("report").innerHTML;
-    const printWindow = window.open("", "_blank");
-
-    if (printWindow) {
-      printWindow.document.write(`
-        <!doctype html>
-        <html>
-        <head>
-        <title>CFM Oil Estimate</title>
-        <style>
-        @page{size:A4 portrait;margin:10mm}
-        body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;margin:0}
-        .report{padding:20px}
-        img{max-width:200px}
-        </style>
-        </head>
-        <body>
-        <article class="report">${report}</article>
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
-      setTimeout(() => printWindow.print(), 800);
-    } else {
-      window.print();
-    }
-  } else {
-    window.print();
-  }
+$("pdf").onclick = async () => {
+  await exportPDFFile();
 };
+
+async function exportPDFFile(){
+  const report = $("report");
+
+  // Load PDF helpers only when needed.
+  if (!window.html2canvas || !window.jspdf) {
+    await loadPDFLibraries();
+  }
+
+  const canvas = await html2canvas(report, {
+    scale: 2,
+    backgroundColor: "#ffffff"
+  });
+
+  const imgData = canvas.toDataURL("image/jpeg", 0.95);
+  const { jsPDF } = window.jspdf;
+
+  const pdf = new jsPDF({
+    orientation: "portrait",
+    unit: "mm",
+    format: "a4"
+  });
+
+  const pageWidth = 210;
+  const pageHeight = 297;
+  const imgWidth = pageWidth - 20;
+  const imgHeight = canvas.height * imgWidth / canvas.width;
+
+  let heightLeft = imgHeight;
+  let position = 10;
+
+  pdf.addImage(imgData, "JPEG", 10, position, imgWidth, imgHeight);
+  heightLeft -= pageHeight;
+
+  while (heightLeft > 0) {
+    position = heightLeft - imgHeight + 10;
+    pdf.addPage();
+    pdf.addImage(imgData, "JPEG", 10, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+  }
+
+  const blob = pdf.output("blob");
+  const file = new File([blob], "CFM-Oil-Estimate.pdf", {
+    type: "application/pdf"
+  });
+
+  if (navigator.canShare && navigator.canShare({files:[file]})) {
+    await navigator.share({
+      files:[file],
+      title:"CFM Oil Estimate"
+    });
+  } else {
+    const url = URL.createObjectURL(blob);
+    window.open(url, "_blank");
+  }
+}
+
+function loadPDFLibraries(){
+  return Promise.all([
+    new Promise(resolve => {
+      const s=document.createElement("script");
+      s.src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+      s.onload=resolve;
+      document.head.appendChild(s);
+    }),
+    new Promise(resolve => {
+      const s=document.createElement("script");
+      s.src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
+      s.onload=resolve;
+      document.head.appendChild(s);
+    })
+  ]);
+}
 
 // Reset button — clears saved state and returns the form to defaults
 $("resetBtn").onclick = () => {

@@ -1,4 +1,4 @@
-const CACHE = "cfm-oil-v1.0";
+const CACHE = "cfm-oil-v1.0.1";
 const ASSETS = [
   "./",
   "./index.html",
